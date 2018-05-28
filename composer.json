@@ -1,0 +1,7 @@
+{
+  "name": "drupal/PROJECT_NAME",
+  "description": "",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/PROJECT_NAME",
+  "require": {}
+}
