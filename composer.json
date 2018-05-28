@@ -1,7 +1,6 @@
 {
-  "name": "drupal/PROJECT_NAME",
-  "description": "",
+  "name": "drupal/vault_key_kv",
+  "description": "Provides HashiCorp Vault key/value secret engine key provider.",
   "type": "drupal-module",
-  "homepage": "https://www.drupal.org/project/PROJECT_NAME",
-  "require": {}
+  "homepage": "https://www.drupal.org/project/vault_key_kv"
 }
