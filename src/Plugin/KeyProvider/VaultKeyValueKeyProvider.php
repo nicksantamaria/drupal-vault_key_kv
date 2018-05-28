@@ -1,22 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\vault\Plugin\KeyProvider\VaultKeyValueKeyProvider.
- */
-
 namespace Drupal\vault_key_kv\Plugin\KeyProvider;
 
 use Drupal\Core\Form\FormStateInterface;
-use \Drupal\Component\Render\FormattableMarkup;
-
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\vault\VaultClient;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
 use Drupal\key\KeyInterface;
 use Drupal\key\Plugin\KeyPluginFormInterface;
 use Drupal\key\Plugin\KeyProviderBase;
 use Drupal\key\Plugin\KeyProviderSettableValueInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Adds a key provider that allows a key to be stored in HashiCorp Vault.
@@ -44,7 +38,7 @@ class VaultKeyValueKeyProvider extends KeyProviderBase implements KeyProviderSet
   /**
    * The Vault client.
    *
-   * @var VaultClient
+   * @var \Drupal\vault\VaultClient
    */
   protected $client;
 
@@ -69,7 +63,7 @@ class VaultKeyValueKeyProvider extends KeyProviderBase implements KeyProviderSet
   /**
    * Sets client property.
    *
-   * @param VaultClient $client
+   * @param \Drupal\vault\VaultClient $client
    *   The vault client.
    *
    * @return self
@@ -89,7 +83,7 @@ class VaultKeyValueKeyProvider extends KeyProviderBase implements KeyProviderSet
    * @return self
    *   Current object.
    */
-  public function setLogger(\Psr\Log\LoggerInterface $logger) {
+  public function setLogger(LoggerInterface $logger) {
     $this->logger = $logger;
     return $this;
   }
@@ -113,7 +107,8 @@ class VaultKeyValueKeyProvider extends KeyProviderBase implements KeyProviderSet
       $response = $this->client->read($path);
       $data = $response->getData()['data'];
       return isset($data['value']) ? $data['value'] : '';
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       $this->logger->critical('Unable to fetch secret ' . $key->id());
       return '';
     }
@@ -208,8 +203,12 @@ class VaultKeyValueKeyProvider extends KeyProviderBase implements KeyProviderSet
    * Builds the URL endpoint.
    *
    * @param string $action
-   * @param KeyInterface $key
+   *   Action being performed. One of "get", "set", "delete".
+   * @param \Drupal\key\KeyInterface $key
+   *   Key entity.
+   *
    * @return string
+   *   Endpoint URL for request action.
    */
   protected function buildRequestPath(string $action, KeyInterface $key) {
     $provider_config = $this->getConfiguration();
@@ -217,7 +216,10 @@ class VaultKeyValueKeyProvider extends KeyProviderBase implements KeyProviderSet
     $placeholders = [
       ':secret_engine_mount' => $provider_config['secret_engine_mount'],
       ':endpoint' => '',
-      ':secret_path' => implode('/', array_filter([trim($provider_config['secret_path_prefix'], '/'), $key->id()])),
+      ':secret_path' => implode('/', array_filter([
+        trim($provider_config['secret_path_prefix'], '/'),
+        $key->id(),
+      ])),
     ];
     switch ($action) {
       case 'get':
